@@ -2,7 +2,7 @@ import axios from "axios";
 
 const instance = axios.create({
   // This should in variable environment
-  baseURL: "https://chat-app-bb.herokuapp.com/",
+  baseURL: "http://localhost:4000",
 });
 
 // Set the AUTH token for any request
