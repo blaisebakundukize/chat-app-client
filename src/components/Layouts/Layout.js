@@ -1,9 +1,12 @@
 import React from "react";
+import { useSelector } from "react-redux";
 
 const Layout = (props) => {
-  const isAuthenticated = true;
+  const authedUser = useSelector((state) => state.auth);
+
+  // const isAuthenticated = true;
   let logoutBlock = null;
-  if (isAuthenticated) {
+  if (authedUser.isAuthenticated) {
     logoutBlock = (
       <button className='logout' onClick={() => console.log("logout")}>
         Logout
