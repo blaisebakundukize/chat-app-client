@@ -1,4 +1,4 @@
-A one to one chat application
+## One to One Chat Application
 
 It is not yet done and not deployed, but can be runned locally. Here are screenshorts of I have been able to finish now!
 
