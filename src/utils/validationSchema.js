@@ -6,3 +6,8 @@ export const registerUserSchema = object().shape({
   username: string().required("Username is required"),
   password: string().required("Password is required"),
 });
+
+// simple validation schema for message input
+export const messageInputSchema = object().shape({
+  massage: string().required("Message is required"),
+});

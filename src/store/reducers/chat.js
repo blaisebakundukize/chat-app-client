@@ -3,6 +3,9 @@ import {
   RECEIVE_ROOM_MESSAGES_SUCCESS,
   RECEIVE_ROOM_MESSAGES_FAIL,
   RECEIVE_ROOM_MESSAGES_START,
+  SEND_MESSAGE_FAIL,
+  SEND_MESSAGE_START,
+  SEND_MESSAGE_SUCCESS,
 } from "../actions/chat";
 
 const initialState = {
@@ -10,6 +13,8 @@ const initialState = {
   roomMessages: null,
   roomMessagesLoading: false,
   roomMessagesError: null,
+  sendMessageLoading: false,
+  sendMessageError: null,
 };
 
 const chat = (state = initialState, action) => {
@@ -40,6 +45,31 @@ const chat = (state = initialState, action) => {
         ...state,
         roomMessagesError: action.error,
         roomMessagesLoading: true,
+      };
+    case SEND_MESSAGE_START:
+      return {
+        ...state,
+        sendMessageLoading: true,
+        sendMessageError: null,
+      };
+    case SEND_MESSAGE_SUCCESS:
+      return {
+        ...state,
+        roomMessages: {
+          ...state.roomMessages,
+          [action.message.room]: [
+            ...state.roomMessages[action.message.room],
+            action.message,
+          ],
+        },
+        roomMessagesLoading: false,
+        roomMessagesError: null,
+      };
+    case SEND_MESSAGE_FAIL:
+      return {
+        ...state,
+        sendMessageError: action.error,
+        sendMessageLoading: false,
       };
     default:
       return state;

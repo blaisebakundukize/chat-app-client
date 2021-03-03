@@ -7,6 +7,7 @@ import Login from "./Login/Login";
 import Chat from "./Chat/Chat";
 import { handleGetAuthedUser } from "../store/actions/login";
 import { handleReceiveRecentChats } from "../store/actions/chat";
+import ProtectedRoute from "./ProtectedRoute/ProtectedRoute";
 
 const App = () => {
   const { authedUser, chat } = useSelector((state) => {
@@ -29,14 +30,17 @@ const App = () => {
     }
   });
 
-  console.log(chat);
-
   return (
     <Layout>
       <Switch>
         <Route path='/login' component={Login} />
         <Route path='/register' component={Register} />
-        <Route path='/' exact component={Chat} />
+        <ProtectedRoute
+          isAuthed={authedUser.isAuthenticated}
+          path='/'
+          exact
+          component={Chat}
+        />
       </Switch>
     </Layout>
   );

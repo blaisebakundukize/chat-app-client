@@ -1,11 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import socketClient from "socket.io-client";
 import ChatList from "./ChatList";
 import MessageList from "../Message/MessagesList";
-import { handleReceiveRoomMessages } from "../../store/actions/chat";
+import MessageInput from "../Message/MessageInput";
+import {
+  handleReceiveRoomMessages,
+  handleSendMessage,
+  sendMessageSuccess,
+} from "../../store/actions/chat";
+
+const SERVER = "http://localhost:4000";
 
 const Chat = () => {
   const [selectedChat, setSelectedChat] = useState(null);
+  const socket = useRef(socketClient(SERVER));
+  const [receivedMessage, setReceivedMessage] = useState({});
 
   const { authedUser, chat } = useSelector((state) => {
     const authedUser = state.auth;
@@ -15,21 +25,58 @@ const Chat = () => {
 
   const dispatch = useDispatch();
 
-  // useEffect(() => {
-  //   if (authedUser.isAuthenticated === true && authedUser.user === null) {
-  //     dispatch(handleGetAuthedUser());
-  //   }
-  // }, [authedUser, dispatch]);
+  socket.current.on("connection", () => {});
+
+  socket.current.on("see-identify", (id) => {
+    console.log(id);
+  });
+
+  useEffect(() => {
+    socket.current.on("message", (message) => {
+      setReceivedMessage({ ...receivedMessage, ...message });
+      if (
+        receivedMessage.room !== message.room &&
+        authedUser.user &&
+        authedUser.user.id !== message.sender
+      ) {
+        dispatch(sendMessageSuccess(message));
+      }
+    });
+  }, [authedUser.user, dispatch, receivedMessage, socket]);
+
+  useEffect(() => {
+    if (authedUser.user) {
+      socket.current.emit("identity", authedUser.user.id);
+    }
+  }, [authedUser.user, socket]);
+
+  useEffect(() => {
+    if (Array.isArray(chat.chats) && chat.chats.length) {
+      socket.current.emit("subscribe", chat.chats);
+    }
+  }, [chat.chats, socket]);
 
   const onSelectedChat = (chat) => {
     setSelectedChat({ ...chat });
     dispatch(handleReceiveRoomMessages(chat.room));
   };
 
-  if (chat.chats === null) {
-  }
+  const onSubmitMessage = ({ message }) => {
+    const { id: receiver, room } = selectedChat;
+    const sender = authedUser.user.id;
+    dispatch(handleSendMessage({ message, room, sender, receiver }));
+    socket.current.emit("send-message", {
+      message,
+      room,
+      receiver,
+      sender,
+    });
+  };
 
-  console.log(chat);
+  // if (chat.chats === null) {
+  // }
+
+  // console.log(chat.chats);
 
   return (
     <>
@@ -60,13 +107,17 @@ const Chat = () => {
               <>
                 {chat.roomMessagesLoading === false ? (
                   <div className='size-full flex-column justify-between'>
-                    <p className='text text-center'>{authedUser.user.name}</p>
+                    <p className='text text-center chat-with-title'>
+                      {authedUser.user.name}
+                    </p>
                     <div className='messages-container'>
                       <MessageList
                         messages={chat.roomMessages[selectedChat.room]}
                         authedUser={authedUser.user}
                       />
-                      <input type='text' placeholder='Message' />
+                      <div className='message-form-container'>
+                        <MessageInput onSubmitMessage={onSubmitMessage} />
+                      </div>
                     </div>
                   </div>
                 ) : (

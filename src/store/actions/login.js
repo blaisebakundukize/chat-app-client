@@ -63,7 +63,7 @@ export function handleGetAuthedUser() {
   return async (dispatch) => {
     try {
       const response = await axios.get("/api/users/me");
-      console.log(response.data);
+      // console.log(response.data);
       dispatch(getAuthedUserSuccess(response.data));
     } catch (error) {
       console.log("axios response error", error.response.data);
